@@ -2,17 +2,24 @@
 Tool for local IP calculating
 
 Как пользоваться.
+
 Установите зависимость: pip install openpyxl
 
 Запустите скрипт: python main.py
 
 Команды в REPL:
+
 1. load network.xlsx (инициализирует модель подсетей);
-2. lookup ips.xlsx result.xlsx (позволяет по списку IP-адресов из файла ips.xlsx или ips.txt получить информацию о подсетях, куда эти IP-адреса входят);
-3. aggregate ips.txt agg.xlsx (склеивает несколько IP-адресов в одну общую подсеть; если подсетей несколько - выдаёт несколько подсетей; на данный момент работает некорректно)
+2. lookup D:\projects\ipeecidr\ips.txt D:\projects\ipeecidr\network.xlsx 
+output.xlsx (позволяет по списку IP-адресов из файла ips.xlsx или ips.txt получить информацию о подсетях, куда эти IP-адреса входят). Примеры файлов:
+network.xlsx. URL: https://github.com/user-attachments/files/32353016/network.xlsx
+output.xlsx. URL: https://github.com/user-attachments/files/32353017/output.xlsx
+3. aggregate D:\projects\ipeecidr\ips.txt D:\projects\ipeecidr\output2.xlsx (склеивает несколько IP-адресов в одну общую подсеть; если подсетей несколько - выдаёт несколько подсетей; на данный момент работает некорректно). Примеры файлов:
+output2.xlsx. URL: https://github.com/user-attachments/files/32353020/output2.xlsx
 4. exit (выход из REPL)
 
-Особенности реализации
+Особенности реализации.
+
 1. Модель сети загружается из Excel, колонки определяются по вхождению подстрок cidr, name, desc.
 2. Входные IP читаются либо из Excel (первая колонка), либо из текстового файла (по одному в строке). Тип определяется по расширению.
 3. Дубликаты удаляются, пробелы обрезаются.
