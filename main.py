@@ -150,7 +150,7 @@ def aggregate_ips(ips, output_file):
 
     wb = Workbook()
     ws = wb.active
-    ws.title = "Aggregated /24"
+    ws.title = "Aggregated"
     ws.append(["CIDR", "Netmask", "IPs in list", "IP addresses"])
 
     for net in sorted_nets:
