@@ -132,37 +132,39 @@ def lookup_ips(network_model, ips, output_file):
 # Функция 2: агрегация IP в минимальный набор CIDR
 # ----------------------------------------------------------------------
 def aggregate_ips(ips, output_file):
-    """Строит минимальный набор CIDR, точно покрывающий только переданные IP."""
+    """Объединяет IP-адреса в подсети /24.
+       Каждый IP относится к своей /24-сети. Уникальные /24-сети
+       выводятся в Excel с указанием маски, количества IP из списка
+       и полного списка адресов, попавших в эту /24."""
     if not ips:
         raise ValueError("Нет IP-адресов для агрегации")
 
-    sorted_ips = sorted(ips, key=lambda x: int(x))
-    ranges = []
-    start = end = sorted_ips[0]
+    # Группируем IP по их /24 сети
+    groups = {}  # IPv4Network(/24) -> list[IPv4Address]
+    for ip in ips:
+        net24 = ipaddress.IPv4Network(f"{ip}/24", strict=False)
+        groups.setdefault(net24, []).append(ip)
 
-    for ip in sorted_ips[1:]:
-        if int(ip) == int(end) + 1:
-            end = ip
-        else:
-            ranges.append((start, end))
-            start = end = ip
-    ranges.append((start, end))
-
-    cidrs = []
-    for start, end in ranges:
-        for cidr in ipaddress.summarize_address_range(start, end):
-            cidrs.append(cidr)
+    # Сортируем сети по возрастанию адреса
+    sorted_nets = sorted(groups.keys(), key=lambda n: int(n.network_address))
 
     wb = Workbook()
     ws = wb.active
-    ws.title = "Aggregated CIDRs"
-    ws.append(["CIDR", "Netmask", "Number of IPs"])
-    for cidr in cidrs:
-        ws.append([str(cidr), str(cidr.netmask), cidr.num_addresses])
+    ws.title = "Aggregated /24"
+    ws.append(["CIDR", "Netmask", "IPs in list", "IP addresses"])
+
+    for net in sorted_nets:
+        member_ips = sorted(groups[net], key=lambda x: int(x))
+        ws.append([
+            str(net),
+            str(net.netmask),
+            len(member_ips),
+            ", ".join(str(ip) for ip in member_ips),
+        ])
 
     wb.save(output_file)
-    print(f"Агрегированные CIDR сохранены в {output_file}")
-
+    print(f"Агрегированные /24-подсети сохранены в {output_file}")
+    print(f"Всего уникальных CIDR: {len(sorted_nets)}")
 
 # ----------------------------------------------------------------------
 # Интерактивный REPL
